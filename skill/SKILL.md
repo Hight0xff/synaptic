@@ -1,4 +1,4 @@
-# 🧠 neural-memory — OpenClaw Skill
+﻿# 馃 neural-memory 鈥?OpenClaw Skill
 
 ## Overview
 
@@ -12,7 +12,7 @@ openclaw skills install neural-memory
 
 Or manual:
 ```bash
-git clone https://github.com/Hight0xff/neural-memory-system.git
+git clone https://github.com/Hight0xff/synaptic.git
 openclaw gateway restart
 ```
 
@@ -38,10 +38,10 @@ node neural-memory/server.js --port 3547 --auth-key your-key
 
 ### Integration with Agent Workflow
 
-1. **Record** → agent records important conversations/decisions as neurons
-2. **Search** → agent retrieves relevant past context before responding
-3. **Learn** → Hebbian learning automatically strengthens co-activated connections
-4. **Consolidate** → daily cron job decays weak connections, archives dormant neurons
+1. **Record** 鈫?agent records important conversations/decisions as neurons
+2. **Search** 鈫?agent retrieves relevant past context before responding
+3. **Learn** 鈫?Hebbian learning automatically strengthens co-activated connections
+4. **Consolidate** 鈫?daily cron job decays weak connections, archives dormant neurons
 
 ### Data Location
 
@@ -49,7 +49,7 @@ node neural-memory/server.js --port 3547 --auth-key your-key
 - Synapses: `memory/neural/synapses.json`
 - Config: `memory/neural/config.json`
 
-> ⚠️ **Security**: Neuron data contains agent-personal memory. Ensure `.gitignore` excludes `memory/neural/` before committing to public repos.
+> 鈿狅笍 **Security**: Neuron data contains agent-personal memory. Ensure `.gitignore` excludes `memory/neural/` before committing to public repos.
 
 ## Dependencies
 
@@ -62,3 +62,4 @@ Open `vis.html` in a browser (requires HTTP server running).
 ## License
 
 MIT
+

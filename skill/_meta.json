@@ -1,11 +1,11 @@
-{
+﻿{
   "name": "neural-memory",
   "version": "1.2.0",
-  "description": "类人神经记忆系统 — 基于神经元和突触的 Agent 持续学习记忆架构",
-  "author": "终光 / Hight0xff",
+  "description": "绫讳汉绁炵粡璁板繂绯荤粺 鈥?鍩轰簬绁炵粡鍏冨拰绐佽Е鐨?Agent 鎸佺画瀛︿範璁板繂鏋舵瀯",
+  "author": "缁堝厜 / Hight0xff",
   "license": "MIT",
   "tags": ["memory", "neural", "hebbian", "learning", "agent"],
-  "homepage": "https://github.com/Hight0xff/neural-memory-system",
+  "homepage": "https://github.com/Hight0xff/synaptic",
   "runtime": "node",
   "minOpenClawVersion": "1.0.0",
   "entry": "cli.js",
@@ -14,3 +14,4 @@
     "server": "server.js"
   }
 }
+

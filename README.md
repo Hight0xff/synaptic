@@ -1,99 +1,81 @@
-# 🧠 neural-memory — 类人神经记忆系统
+﻿# 馃 neural-memory 鈥?绫讳汉绁炵粡璁板繂绯荤粺
 
-> 基于神经元模型的 AI Agent 持续学习记忆架构  
-> 零外部依赖 · 纯 Node.js 标准库 · 42KB
+> 鍩轰簬绁炵粡鍏冩ā鍨嬬殑 AI Agent 鎸佺画瀛︿範璁板繂鏋舵瀯  
+> 闆跺閮ㄤ緷璧?路 绾?Node.js 鏍囧噯搴?路 42KB
 
 ---
 
-## 概述
+## 姒傝堪
 
-将每条记忆抽象为独立「神经元」，通过加权有向「突触」建立关联，使用前向信号传播（BFS）、赫布学习（Hebbian）和周期性记忆巩固，实现可持续的自主学习与遗忘。
-
-## 快速安装
-
+灏嗘瘡鏉¤蹇嗘娊璞′负鐙珛銆岀缁忓厓銆嶏紝閫氳繃鍔犳潈鏈夊悜銆岀獊瑙︺€嶅缓绔嬪叧鑱旓紝浣跨敤鍓嶅悜淇″彿浼犳挱锛圔FS锛夈€佽但甯冨涔狅紙Hebbian锛夊拰鍛ㄦ湡鎬ц蹇嗗珐鍥猴紝瀹炵幇鍙寔缁殑鑷富瀛︿範涓庨仐蹇樸€?
+## 蹇€熷畨瑁?
 ```bash
-# 通过 OpenClaw CLI 安装（推荐）
+# 閫氳繃 OpenClaw CLI 瀹夎锛堟帹鑽愶級
 openclaw skills install neural-memory
 
-# 或从 GitHub 手动安装
-git clone https://github.com/Hight0xff/neural-memory-system.git
-cd neural-memory-system
-npm install  # 零依赖，仅建立软链接
+# 鎴栦粠 GitHub 鎵嬪姩瀹夎
+git clone https://github.com/Hight0xff/synaptic.git
+cd synaptic
+npm install  # 闆朵緷璧栵紝浠呭缓绔嬭蒋閾炬帴
 ```
 
-安装后运行初始化：
-```bash
-node seed-self.js   # 创建自引用种子神经元
-node cli.js stats   # 验证安装
+瀹夎鍚庤繍琛屽垵濮嬪寲锛?```bash
+node seed-self.js   # 鍒涘缓鑷紩鐢ㄧ瀛愮缁忓厓
+node cli.js stats   # 楠岃瘉瀹夎
 ```
 
-## 架构
+## 鏋舵瀯
 
 ```
 neural-memory/
-├── lib/                        # 核心引擎
-│   ├── neuron-store.js         # 神经元存储（文件系统）
-│   ├── synapse-matrix.js       # 突触矩阵（加权有向图）
-│   ├── activation-engine.js    # 前向信号传播（BFS）
-│   ├── hebbian.js              # 赫布学习（共激活强化）
-│   ├── consolidator.js         # 睡眠巩固（衰减/归档/模式发现）
-│   ├── recall.js               # 统一召回接口
-│   └── migrator.js             # 迁移工具（从 MEMORY.md 导入）
-├── cli.js                      # 命令行管理工具
-├── recall.js                   # 快速召回入口
-├── server.js                   # HTTP API 服务（端口 3547）
-├── seed-self.js                # 自引用种子初始化
-├── install.js                  # 安装脚本
-└── vis.html                    # D3 可视化面板
-```
+鈹溾攢鈹€ lib/                        # 鏍稿績寮曟搸
+鈹?  鈹溾攢鈹€ neuron-store.js         # 绁炵粡鍏冨瓨鍌紙鏂囦欢绯荤粺锛?鈹?  鈹溾攢鈹€ synapse-matrix.js       # 绐佽Е鐭╅樀锛堝姞鏉冩湁鍚戝浘锛?鈹?  鈹溾攢鈹€ activation-engine.js    # 鍓嶅悜淇″彿浼犳挱锛圔FS锛?鈹?  鈹溾攢鈹€ hebbian.js              # 璧竷瀛︿範锛堝叡婵€娲诲己鍖栵級
+鈹?  鈹溾攢鈹€ consolidator.js         # 鐫＄湢宸╁浐锛堣“鍑?褰掓。/妯″紡鍙戠幇锛?鈹?  鈹溾攢鈹€ recall.js               # 缁熶竴鍙洖鎺ュ彛
+鈹?  鈹斺攢鈹€ migrator.js             # 杩佺Щ宸ュ叿锛堜粠 MEMORY.md 瀵煎叆锛?鈹溾攢鈹€ cli.js                      # 鍛戒护琛岀鐞嗗伐鍏?鈹溾攢鈹€ recall.js                   # 蹇€熷彫鍥炲叆鍙?鈹溾攢鈹€ server.js                   # HTTP API 鏈嶅姟锛堢鍙?3547锛?鈹溾攢鈹€ seed-self.js                # 鑷紩鐢ㄧ瀛愬垵濮嬪寲
+鈹溾攢鈹€ install.js                  # 瀹夎鑴氭湰
+鈹斺攢鈹€ vis.html                    # D3 鍙鍖栭潰鏉?```
 
-## CLI 使用
+## CLI 浣跨敤
 
 ```bash
-# 搜索/激活记忆
-node cli.js search "你的查询"
+# 鎼滅储/婵€娲昏蹇?node cli.js search "浣犵殑鏌ヨ"
 
-# 记录新记忆
-node cli.js record sensory "学习了新知识" --content "详细内容" --tags "tag1,tag2"
+# 璁板綍鏂拌蹇?node cli.js record sensory "瀛︿範浜嗘柊鐭ヨ瘑" --content "璇︾粏鍐呭" --tags "tag1,tag2"
 
-# 创建神经元
-node cli.js create fact "事实名称" --content "事实内容"
+# 鍒涘缓绁炵粡鍏?node cli.js create fact "浜嬪疄鍚嶇О" --content "浜嬪疄鍐呭"
 
-# 查看系统统计
+# 鏌ョ湅绯荤粺缁熻
 node cli.js stats
 
-# 运行记忆巩固（衰减+归档）
-node cli.js consolidate
+# 杩愯璁板繂宸╁浐锛堣“鍑?褰掓。锛?node cli.js consolidate
 
-# 列出记忆
+# 鍒楀嚭璁板繂
 node cli.js list [type]
 ```
 
-## HTTP API 服务
+## HTTP API 鏈嶅姟
 
 ```bash
 node server.js --port 3547 --auth-key your-secret-key
 ```
 
-| 端点 | 方法 | 说明 |
+| 绔偣 | 鏂规硶 | 璇存槑 |
 |------|------|------|
-| `/api/recall?q=...` | GET | 召回搜索 |
-| `/api/neuron/:id` | GET | 获取神经元详情 |
-| `/api/neurons` | GET | 列出所有神经元 |
-| `/api/create` | POST | 创建神经元 |
-| `/api/stats` | GET | 系统统计 |
-| `/api/consolidate` | POST | 触发巩固 |
-| `/` | GET | 可视化面板 |
+| `/api/recall?q=...` | GET | 鍙洖鎼滅储 |
+| `/api/neuron/:id` | GET | 鑾峰彇绁炵粡鍏冭鎯?|
+| `/api/neurons` | GET | 鍒楀嚭鎵€鏈夌缁忓厓 |
+| `/api/create` | POST | 鍒涘缓绁炵粡鍏?|
+| `/api/stats` | GET | 绯荤粺缁熻 |
+| `/api/consolidate` | POST | 瑙﹀彂宸╁浐 |
+| `/` | GET | 鍙鍖栭潰鏉?|
 
-## MCP 协议支持
+## MCP 鍗忚鏀寔
 
-本系统同时提供 [MCP (Model Context Protocol)](https://modelcontextprotocol.io) 服务器，使任何兼容 MCP 的 AI 客户端（Claude Desktop、Cursor、VS Code AI 等）都能直接接入神经记忆。
-
+鏈郴缁熷悓鏃舵彁渚?[MCP (Model Context Protocol)](https://modelcontextprotocol.io) 鏈嶅姟鍣紝浣夸换浣曞吋瀹?MCP 鐨?AI 瀹㈡埛绔紙Claude Desktop銆丆ursor銆乂S Code AI 绛夛級閮借兘鐩存帴鎺ュ叆绁炵粡璁板繂銆?
 ```bash
-# 启动 MCP 服务器
-cd mcp && node index.js
+# 鍚姩 MCP 鏈嶅姟鍣?cd mcp && node index.js
 
-# 或在 Claude Desktop 中配置：
+# 鎴栧湪 Claude Desktop 涓厤缃細
 # {
 #   "mcpServers": {
 #     "neural-memory": {
@@ -104,49 +86,38 @@ cd mcp && node index.js
 # }
 ```
 
-MCP 提供以下工具：
-- `search_memory` — 搜索激活记忆
-- `record_memory` — 记录新记忆
-- `get_neuron` — 获取神经元详情
-- `get_stats` — 系统统计
-- `consolidate` — 触发巩固
-- *计划中*：`list_recent`、`delete_neuron`、`connect_neurons`
+MCP 鎻愪緵浠ヤ笅宸ュ叿锛?- `search_memory` 鈥?鎼滅储婵€娲昏蹇?- `record_memory` 鈥?璁板綍鏂拌蹇?- `get_neuron` 鈥?鑾峰彇绁炵粡鍏冭鎯?- `get_stats` 鈥?绯荤粺缁熻
+- `consolidate` 鈥?瑙﹀彂宸╁浐
+- *璁″垝涓?锛歚list_recent`銆乣delete_neuron`銆乣connect_neurons`
 
 ---
 
-## 神经科学映射
+## 绁炵粡绉戝鏄犲皠
 
-| 生物结构 | 代码角色 | 实现 |
+| 鐢熺墿缁撴瀯 | 浠ｇ爜瑙掕壊 | 瀹炵幇 |
 |---------|---------|------|
-| 树突（接收信号） | `activation-engine.computeSignal()` | 关键词匹配 + 多维度评分 |
-| 胞体（整合判断） | `if potential >= threshold` | 累积信号与阈值比较 |
-| 轴突（输出信号） | `neuron.output = 1.0` | 标记激活并传播 |
-| 突触（连接强度） | `synapse-matrix.getWeight()` | 0~1 加权有向边 |
-| 赫布学习 | `hebbian.learn()` | 共激活强化连接 |
-| 睡眠巩固 | `consolidator.consolidate()` | 衰减/归档/模式发现 |
+| 鏍戠獊锛堟帴鏀朵俊鍙凤級 | `activation-engine.computeSignal()` | 鍏抽敭璇嶅尮閰?+ 澶氱淮搴﹁瘎鍒?|
+| 鑳炰綋锛堟暣鍚堝垽鏂級 | `if potential >= threshold` | 绱Н淇″彿涓庨槇鍊兼瘮杈?|
+| 杞寸獊锛堣緭鍑轰俊鍙凤級 | `neuron.output = 1.0` | 鏍囪婵€娲诲苟浼犳挱 |
+| 绐佽Е锛堣繛鎺ュ己搴︼級 | `synapse-matrix.getWeight()` | 0~1 鍔犳潈鏈夊悜杈?|
+| 璧竷瀛︿範 | `hebbian.learn()` | 鍏辨縺娲诲己鍖栬繛鎺?|
+| 鐫＄湢宸╁浐 | `consolidator.consolidate()` | 琛板噺/褰掓。/妯″紡鍙戠幇 |
 
 ---
 
-## 🔒 敏感信息安全提示
+## 馃敀 鏁忔劅淇℃伅瀹夊叏鎻愮ず
 
-> **部署前必读**：本系统在运行中会生成真实的对话/决策数据。
+> **閮ㄧ讲鍓嶅繀璇?*锛氭湰绯荤粺鍦ㄨ繍琛屼腑浼氱敓鎴愮湡瀹炵殑瀵硅瘽/鍐崇瓥鏁版嵁銆?
+### 鈿狅笍 鍒囧嬁鎻愪氦鍒板叕寮€浠撳簱鐨勫唴瀹?
+1. **宸ヤ綔鍖烘暟鎹?*锛歚memory/neural/neurons/` 鍜?`memory/neural/archive/` 涓嬬殑 JSON 鏂囦欢鍖呭惈瀹為檯瀵硅瘽璁板綍鍜屼釜浜鸿蹇?2. **绐佽Е鏁版嵁**锛歚memory/neural/synapses.json` 鍖呭惈鍏宠仈鏉冮噸鍥?3. **鐜鍙橀噺/瀵嗛挜**锛氫换浣?`.env` 鏂囦欢銆丄PI Key 鍜屽瘑鐮?4. **閰嶇疆鏂囦欢**锛歚config.json` 鍙兘鍖呭惈鍐呯綉璺緞鍜屾湇鍔￠厤缃?
+### 瀹夊叏浣跨敤寤鸿
 
-### ⚠️ 切勿提交到公开仓库的内容
-
-1. **工作区数据**：`memory/neural/neurons/` 和 `memory/neural/archive/` 下的 JSON 文件包含实际对话记录和个人记忆
-2. **突触数据**：`memory/neural/synapses.json` 包含关联权重图
-3. **环境变量/密钥**：任何 `.env` 文件、API Key 和密码
-4. **配置文件**：`config.json` 可能包含内网路径和服务配置
-
-### 安全使用建议
-
-- 运行 `git add` 前检查 `.gitignore` 是否正确配置
-- 使用 `--auth-key` 参数保护 HTTP API 端点
-- 定期清理过期的存档数据
-- 在公共演示中使用 `seed-self.js` 生成的示例数据，而非真实数据
+- 杩愯 `git add` 鍓嶆鏌?`.gitignore` 鏄惁姝ｇ‘閰嶇疆
+- 浣跨敤 `--auth-key` 鍙傛暟淇濇姢 HTTP API 绔偣
+- 瀹氭湡娓呯悊杩囨湡鐨勫瓨妗ｆ暟鎹?- 鍦ㄥ叕鍏辨紨绀轰腑浣跨敤 `seed-self.js` 鐢熸垚鐨勭ず渚嬫暟鎹紝鑰岄潪鐪熷疄鏁版嵁
 
 ---
 
 ## License
 
-MIT — 自由使用、修改、分发。欢迎 Star ⭐、Issue 💬、PR 🤝。
+MIT 鈥?鑷敱浣跨敤銆佷慨鏀广€佸垎鍙戙€傛杩?Star 猸愩€両ssue 馃挰銆丳R 馃銆?

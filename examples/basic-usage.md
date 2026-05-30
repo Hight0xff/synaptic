@@ -1,6 +1,6 @@
-# Basic Usage Examples
+﻿# Basic Usage Examples
 
-## 1. CLI — Quick Search
+## 1. CLI 鈥?Quick Search
 
 ```bash
 # Search your memory
@@ -11,7 +11,7 @@ node cli.js search "what did I learn about neural networks"
 # Stats: 243 total, 320ms
 ```
 
-## 2. CLI — Record New Memory
+## 2. CLI 鈥?Record New Memory
 
 ```bash
 # Record a fact
@@ -22,7 +22,7 @@ node cli.js record fact "MCP protocol uses JSON-RPC 2.0" --content "Model Contex
 # Connected to 3 related memories
 ```
 
-## 3. HTTP Server — Visualize
+## 3. HTTP Server 鈥?Visualize
 
 ```bash
 # Start server
@@ -32,7 +32,7 @@ node server.js --port 3547 --auth-key mykey
 # You'll see the D3 force-directed graph of your neural network
 ```
 
-## 4. MCP — With Claude Desktop
+## 4. MCP 鈥?With Claude Desktop
 
 Add to `claude_desktop_config.json`:
 
@@ -41,7 +41,7 @@ Add to `claude_desktop_config.json`:
   "mcpServers": {
     "neural-memory": {
       "command": "node",
-      "args": ["/path/to/neural-memory-system/mcp/index.js"]
+      "args": ["/path/to/synaptic/mcp/index.js"]
     }
   }
 }
@@ -52,19 +52,19 @@ Then in Claude Desktop, ask:
 - "Record that I learned about MCP protocol"
 - "Show me my memory statistics"
 
-## 5. MCP — With Cursor
+## 5. MCP 鈥?With Cursor
 
-In Cursor settings → MCP Servers → Add:
+In Cursor settings 鈫?MCP Servers 鈫?Add:
 
 ```
 Name: neural-memory
 Type: command
-Command: node /path/to/neural-memory-system/mcp/index.js
+Command: node /path/to/synaptic/mcp/index.js
 ```
 
 Then use `@neural-memory` in your Cursor chat.
 
-## 6. MCP — With VS Code AI
+## 6. MCP 鈥?With VS Code AI
 
 In VS Code settings.json:
 
@@ -73,8 +73,9 @@ In VS Code settings.json:
   "github.copilot.mcpServers": {
     "neural-memory": {
       "command": "node",
-      "args": ["/path/to/neural-memory-system/mcp/index.js"]
+      "args": ["/path/to/synaptic/mcp/index.js"]
     }
   }
 }
 ```
+

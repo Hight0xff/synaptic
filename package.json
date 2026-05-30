@@ -1,7 +1,7 @@
-{
-  "name": "neural-memory-system",
+﻿{
+  "name": "synaptic",
   "version": "1.2.0",
-  "description": "🧠 Human-like neural memory system — Neuron-based persistent memory with Hebbian learning for AI agents",
+  "description": "馃 Human-like neural memory system 鈥?Neuron-based persistent memory with Hebbian learning for AI agents",
   "main": "cli.js",
   "bin": {
     "nm": "./cli.js",
@@ -39,3 +39,4 @@
     "mcp/"
   ]
 }
+

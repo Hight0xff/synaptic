@@ -1,18 +1,21 @@
 {
-  "name": "neural-memory-mcp",
+  "name": "synaptic-mcp",
   "version": "1.0.0",
-  "description": "MCP server for Neural Memory System — search, record, and manage persistent agent memory",
+  "description": "MCP server for Synaptic neural memory — search, record, and manage persistent agent memory",
   "type": "module",
   "main": "index.js",
   "bin": {
-    "neural-memory-mcp": "./index.js"
+    "synaptic-mcp": "./index.js"
   },
   "scripts": {
     "start": "node index.js"
   },
-  "keywords": ["mcp", "neural-memory", "model-context-protocol", "agent-memory"],
+  "keywords": ["mcp", "synaptic", "neural-memory", "model-context-protocol", "agent-memory", "hebbian"],
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -1,7 +1,7 @@
-﻿{
-  "name": "synaptic",
+{
+  "name": "synaptic-memory",
   "version": "1.2.0",
-  "description": "馃 Human-like neural memory system 鈥?Neuron-based persistent memory with Hebbian learning for AI agents",
+  "description": "Human-like neural memory system - Neuron-based persistent memory with Hebbian learning for AI agents",
   "main": "cli.js",
   "bin": {
     "nm": "./cli.js",
@@ -16,6 +16,7 @@
     "install": "node install.js"
   },
   "keywords": [
+    "synaptic",
     "neural-memory",
     "hebbian-learning",
     "agent-memory",
@@ -37,6 +38,8 @@
     "vis.html",
     "skill/",
     "mcp/"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }
-

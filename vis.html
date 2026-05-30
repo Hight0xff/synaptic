@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧬 终光神经记忆可视化</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #0f1117; color: #e1e4e8; overflow: hidden; height: 100vh;
+}
+/* ─── Layout ─── */
+#app { display: flex; height: 100vh; }
+#sidebar { width: 320px; min-width: 320px; background: #161b22; border-right: 1px solid #30363d; display: flex; flex-direction: column; }
+#main { flex: 1; position: relative; }
+/* ─── Toolbar ─── */
+#toolbar { padding: 16px; border-bottom: 1px solid #30363d; }
+#toolbar h1 { font-size: 16px; margin-bottom: 12px; }
+#toolbar h1 span { color: #58a6ff; }
+#search-box { width: 100%; padding: 8px 12px; border: 1px solid #30363d; border-radius: 6px; background: #0f1117; color: #e1e4e8; font-size: 13px; outline: none; }
+#search-box:focus { border-color: #58a6ff; }
+#search-status { font-size: 11px; color: #8b949e; margin-top: 4px; min-height: 16px; }
+/* ─── Filters ─── */
+#filters { padding: 12px 16px; border-bottom: 1px solid #30363d; }
+#filters label { display: inline-flex; align-items: center; gap: 4px; margin: 2px 6px 2px 0; font-size: 12px; cursor: pointer; padding: 3px 8px; border-radius: 4px; background: #1c2128; }
+#filters input { accent-color: #58a6ff; }
+/* ─── Stats ─── */
+#stats { padding: 12px 16px; flex: 1; overflow-y: auto; font-size: 12px; line-height: 1.8; }
+.stat-row { display: flex; justify-content: space-between; padding: 2px 0; }
+.stat-label { color: #8b949e; }
+.stat-value { color: #e1e4e8; font-variant-numeric: tabular-nums; }
+.weight-bar { display: inline-block; height: 10px; border-radius: 3px; vertical-align: middle; margin-right: 4px; min-width: 2px; }
+/* ─── Buttons ─── */
+.btn { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border:none; border-radius:4px; font-size:12px; cursor:pointer; }
+.btn-primary { background:#238636; color:#fff; }
+.btn-primary:hover { background:#2ea043; }
+.btn-danger { background:#da3633; color:#fff; }
+.btn-danger:hover { background:#f85149; }
+.btn-sm { padding:2px 6px; font-size:11px; }
+.btn-outline { background:transparent; border:1px solid #30363d; color:#c9d1d9; }
+.btn-outline:hover { background:#1c2128; }
+
+/* ─── Create Modal ─── */
+#modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; justify-content:center; align-items:center; }
+#modal-overlay.show { display:flex; }
+#modal-box { background:#161b22; border:1px solid #30363d; border-radius:8px; padding:20px; width:400px; max-height:80vh; overflow-y:auto; }
+#modal-box h2 { font-size:15px; margin-bottom:12px; }
+#modal-box label { display:block; font-size:12px; color:#8b949e; margin:8px 0 4px; }
+#modal-box input, #modal-box select, #modal-box textarea { width:100%; padding:6px 10px; border:1px solid #30363d; border-radius:4px; background:#0f1117; color:#e1e4e8; font-size:13px; outline:none; }
+#modal-box textarea { min-height:60px; resize:vertical; }
+#modal-box input:focus, #modal-box select:focus, #modal-box textarea:focus { border-color:#58a6ff; }
+#modal-btns { display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
+
+/* ─── Detail Panel ─── */
+#detail { display: none; padding: 12px 16px; border-top: 1px solid #30363d; max-height: 280px; overflow-y: auto; background: #1c2128; }
+#detail.show { display: block; }
+#detail h3 { font-size: 13px; margin-bottom: 6px; }
+#detail .dt-row { font-size: 12px; padding: 2px 0; }
+#detail .dt-label { color: #8b949e; }
+#detail .neighbor { font-size: 11px; display: flex; justify-content: space-between; padding: 1px 4px; border-radius: 3px; }
+#detail .neighbor:hover { background: #30363d; }
+#detail-close { float: right; cursor: pointer; color: #8b949e; padding: 0 4px; }
+#detail-close:hover { color: #f85149; }
+/* ─── SVG Graph ─── */
+svg { width: 100%; height: 100%; }
+.link { stroke-opacity: 0.3; }
+.node-label { font-size: 9px; pointer-events: none; fill: #8b949e; text-shadow: 0 1px 2px #0f1117, 0 -1px 2px #0f1117, 1px 0 2px #0f1117, -1px 0 2px #0f1117; }
+/* ─── Legend ─── */
+#legend { position: absolute; bottom: 16px; left: 16px; background: rgba(22,27,34,0.9); border: 1px solid #30363d; border-radius: 6px; padding: 8px 12px; font-size: 11px; line-height: 1.6; }
+.legend-item { display: inline-flex; align-items: center; gap: 4px; margin-right: 10px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+/* Type colors */
+.type-project { color: #ef4444; } .dot-project { fill: #ef4444; }
+.type-decision { color: #f59e0b; } .dot-decision { fill: #f59e0b; }
+.type-sensory { color: #6b7280; } .dot-sensory { fill: #6b7280; }
+.type-pattern { color: #10b981; } .dot-pattern { fill: #10b981; }
+.type-fact { color: #3b82f6; } .dot-fact { fill: #3b82f6; }
+/* Highlight / search */
+.node-highlight { stroke: #f0c040 !important; stroke-width: 3px !important; }
+.node-dim { opacity: 0.15 !important; }
+.link-dim { stroke-opacity: 0.03 !important; }
+.search-match { stroke: #f0c040 !important; stroke-width: 4px !important; filter: drop-shadow(0 0 6px #f0c040); }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="sidebar">
+    <div id="toolbar">
+      <h1>🧬 终光 · <span>神经记忆</span></h1>
+      <div style="display:flex;gap:6px;">
+        <input id="search-box" type="text" placeholder="搜索记忆..." style="flex:1;" />
+        <button class="btn btn-primary" onclick="showCreate()" title="新建记忆">＋</button>
+      </div>
+      <div id="search-status"></div>
+    </div>
+    <div id="filters">
+      <label><input type="checkbox" value="project" checked> <span class="type-project">●</span> 项目</label>
+      <label><input type="checkbox" value="decision" checked> <span class="type-decision">●</span> 决策</label>
+      <label><input type="checkbox" value="pattern" checked> <span class="type-pattern">●</span> 模式</label>
+      <label><input type="checkbox" value="fact" checked> <span class="type-fact">●</span> 事实</label>
+      <label><input type="checkbox" value="sensory" checked> <span class="type-sensory">●</span> 感官</label>
+    </div>
+    <div id="stats"></div>
+    <div id="detail">
+      <span id="detail-close">✕</span>
+      <div id="detail-content"></div>
+      <div id="detail-actions" style="display:flex;gap:6px;margin-top:8px;">
+        <button class="btn btn-sm btn-outline" onclick="editCurrent()">✏ 编辑</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteCurrent()">🗑 删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Modal -->
+  <div id="modal-overlay">
+    <div id="modal-box">
+      <h2 id="modal-title">新建记忆</h2>
+      <label>类型</label>
+      <select id="modal-type">
+        <option value="fact">事实</option>
+        <option value="decision">决策</option>
+        <option value="pattern">模式</option>
+        <option value="sensory">感官</option>
+        <option value="project">项目</option>
+      </select>
+      <label>名称</label>
+      <input id="modal-name" placeholder="记忆名称" />
+      <label>内容</label>
+      <textarea id="modal-content" placeholder="详细内容（可选）"></textarea>
+      <label>标签（逗号分隔）</label>
+      <input id="modal-tags" placeholder="标签1,标签2" />
+      <div id="modal-btns">
+        <button class="btn btn-outline" onclick="hideCreate()">取消</button>
+        <button class="btn btn-primary" onclick="submitCreate()">保存</button>
+      </div>
+    </div>
+  </div>
+  <div id="main">
+    <svg id="graph"></svg>
+    <div id="legend">
+      <span class="legend-item"><span class="legend-dot dot-project"></span> 项目</span>
+      <span class="legend-item"><span class="legend-dot dot-decision"></span> 决策</span>
+      <span class="legend-item"><span class="legend-dot dot-pattern"></span> 模式</span>
+      <span class="legend-item"><span class="legend-dot dot-fact"></span> 事实</span>
+      <span class="legend-item"><span class="legend-dot dot-sensory"></span> 感官</span>
+      <span style="color:#8b949e;margin-left:8px;" id="legend-count"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+// 自动检测 API 地址：挂在哪就从哪调，否则走 3547
+const API = window.location.port === '3547' ? '' : 'http://127.0.0.1:3547';
+const TYPE_COLORS = { project:'#ef4444', decision:'#f59e0b', pattern:'#10b981', fact:'#3b82f6', sensory:'#6b7280' };
+const TYPE_ORDER = ['project','decision','pattern','fact','sensory'];
+let graphData = null, svg = null, simulation = null, nodeGroup = null, linkGroup = null, labelGroup = null;
+let allNodes = [], allLinks = [], nodeById = new Map();
+let selectedId = null, searchResultIds = new Set();
+
+// ─── Data Loading ───
+async function loadGraph() {
+  const [graphRes, statsRes] = await Promise.all([
+    fetch(API + '/graph'),
+    fetch(API + '/stats')
+  ]);
+  graphData = await graphRes.json();
+  const statsData = await statsRes.json();
+  renderStats(statsData);
+  return graphData;
+}
+
+// ─── Stats Panel ───
+function renderStats(s) {
+  const wd = s.synapses.weightDistribution || {};
+  const maxW = Math.max(...Object.values(wd), 1);
+  const width = 140;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat-row"><span class="stat-label">神经元</span><span class="stat-value">${s.neurons.total} 活跃 + ${s.neurons.archived} 存档</span></div>
+    <div class="stat-row"><span class="stat-label">突触</span><span class="stat-value">${s.synapses.edges} 条</span></div>
+    <div class="stat-row"><span class="stat-label">平均权重</span><span class="stat-value">${s.synapses.avgWeight}</span></div>
+    <div class="stat-row"><span class="stat-label">总激活</span><span class="stat-value">${s.neurons.totalActivationCount} 次</span></div>
+    <div style="margin-top:8px;font-size:11px;color:#8b949e;">权重分布</div>
+    ${Object.entries(wd).map(([k,v]) => `<div class="stat-row"><span class="stat-label">${k}</span><span class="stat-value"><span class="weight-bar" style="width:${Math.max(2, v/maxW*width)}px;background:${k==='0.8-1.0'?'#ef4444':k==='0.6-0.8'?'#f59e0b':k==='0.4-0.6'?'#10b981':k==='0.2-0.4'?'#3b82f6':'#6b7280'}"></span> ${v}</span></div>`).join('')}
+  `;
+}
+
+// ─── Graph Rendering ───
+function renderGraph(data) {
+  allNodes = data.nodes;
+  allLinks = data.links;
+  for (const n of allNodes) nodeById.set(n.id, n);
+
+  const width = document.getElementById('main').clientWidth;
+  const height = document.getElementById('main').clientHeight;
+  svg = d3.select('#graph');
+  svg.selectAll('*').remove();
+
+  // Zoom
+  const g = svg.append('g');
+  svg.call(d3.zoom().scaleExtent([0.1, 8]).on('zoom', (e) => g.attr('transform', e.transform)));
+
+  linkGroup = g.append('g').attr('class', 'links');
+  nodeGroup = g.append('g').attr('class', 'nodes');
+  labelGroup = g.append('g').attr('class', 'labels');
+
+  // Simulation
+  simulation = d3.forceSimulation(allNodes)
+    .force('link', d3.forceLink(allLinks).id(d => d.id).distance(d => 30 + (1 - d.weight) * 80))
+    .force('charge', d3.forceManyBody().strength(-120))
+    .force('center', d3.forceCenter(width/2, height/2))
+    .force('collision', d3.forceCollide().radius(d => 5 + (d.activationCount||0)/3));
+
+  // Links
+  const link = linkGroup.selectAll('line')
+    .data(allLinks).enter().append('line')
+    .attr('class', 'link')
+    .attr('stroke', d => TYPE_COLORS[nodeById.get(d.source)?.type] || '#666')
+    .attr('stroke-width', d => Math.max(0.3, d.weight * 3))
+    .attr('stroke-opacity', d => 0.1 + d.weight * 0.4);
+
+  // Nodes
+  const node = nodeGroup.selectAll('circle')
+    .data(allNodes).enter().append('circle')
+    .attr('r', d => 3 + Math.min(8, (d.activationCount||0) * 0.5 + (d.strength||0) * 4))
+    .attr('fill', d => TYPE_COLORS[d.type] || '#666')
+    .attr('stroke', '#0f1117')
+    .attr('stroke-width', 1)
+    .attr('class', d => 'dot-' + d.type)
+    .attr('data-id', d => d.id)
+    .style('cursor', 'pointer')
+    .on('click', (e, d) => showDetail(d.id))
+    .call(d3.drag()
+      .on('start', (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+      .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
+      .on('end', (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; })
+    );
+
+  // Labels
+  const label = labelGroup.selectAll('text')
+    .data(allNodes).enter().append('text')
+    .attr('class', 'node-label')
+    .text(d => d.name.length > 16 ? d.name.slice(0, 14) + '..' : d.name);
+
+  // Tick
+  simulation.on('tick', () => {
+    link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+        .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+    node.attr('cx', d => d.x).attr('cy', d => d.y);
+    label.attr('x', d => d.x + 8).attr('y', d => d.y + 3);
+  });
+
+  // Legend count
+  document.getElementById('legend-count').textContent = `${allNodes.length} 节点 / ${allLinks.length} 连接`;
+
+  // Apply filters
+  applyFilters();
+}
+
+// ─── Filters ───
+function applyFilters() {
+  const checked = new Set();
+  document.querySelectorAll('#filters input:checked').forEach(cb => checked.add(cb.value));
+
+  nodeGroup.selectAll('circle').attr('display', d => checked.has(d.type) ? null : 'none');
+  labelGroup.selectAll('text').attr('display', d => checked.has(d.type) ? null : 'none');
+  linkGroup.selectAll('line').attr('display', d => {
+    const sid = typeof d.source === 'object' ? d.source.id : d.source;
+    const tid = typeof d.target === 'object' ? d.target.id : d.target;
+    const sNode = nodeById.get(sid);
+    const tNode = nodeById.get(tid);
+    return checked.has(sNode?.type) && checked.has(tNode?.type) ? null : 'none';
+  });
+}
+
+document.querySelectorAll('#filters input').forEach(cb => {
+  cb.addEventListener('change', applyFilters);
+});
+
+// ─── Search ───
+async function doSearch(query) {
+  const status = document.getElementById('search-status');
+  if (!query.trim()) {
+    clearSearch();
+    status.textContent = '';
+    return;
+  }
+  status.textContent = '搜索中...';
+  try {
+    const res = await fetch(API + '/search', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ query, persist: false, learn: false })
+    });
+    const data = await res.json();
+    searchResultIds = new Set(data.activated.map(n => n.id));
+
+    // Highlight & dim
+    nodeGroup.selectAll('circle')
+      .attr('class', d => searchResultIds.has(d.id) ? (d.type ? 'dot-' + d.type : '') + ' search-match' : (d.type ? 'dot-' + d.type : '') + ' node-dim');
+    linkGroup.selectAll('line')
+      .attr('class', d => {
+        const sid = typeof d.source === 'object' ? d.source.id : d.source;
+        const tid = typeof d.target === 'object' ? d.target.id : d.target;
+        return (searchResultIds.has(sid) && searchResultIds.has(tid)) ? 'link' : 'link link-dim';
+      });
+    labelGroup.selectAll('text')
+      .attr('class', d => searchResultIds.has(d.id) ? 'node-label' : 'node-label node-dim');
+
+    if (data.associated && data.associated.length > 0) {
+      status.textContent = `✦ 激活 ${data.activated.length} / 关联 ${data.associated.length} / ${data.stats.elapsed}ms`;
+    } else {
+      status.textContent = `✦ 激活 ${data.activated.length} / ${data.stats.elapsed}ms`;
+    }
+  } catch (e) {
+    status.textContent = '搜索失败: ' + e.message;
+  }
+}
+
+function clearSearch() {
+  searchResultIds = new Set();
+  nodeGroup.selectAll('circle').attr('class', d => d.type ? 'dot-' + d.type : '');
+  linkGroup.selectAll('line').attr('class', 'link');
+  labelGroup.selectAll('text').attr('class', 'node-label');
+}
+
+let searchTimer = null;
+document.getElementById('search-box').addEventListener('input', function() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => doSearch(this.value), 300);
+});
+
+// ─── Detail Panel ───
+async function showDetail(id) {
+  selectedId = id;
+  const panel = document.getElementById('detail');
+  const content = document.getElementById('detail-content');
+  panel.classList.add('show');
+
+  try {
+    const res = await fetch(`${API}/neuron/${id}`);
+    const data = await res.json();
+    const n = data.neuron;
+    content.innerHTML = `
+      <h3><span style="color:${TYPE_COLORS[n.type]}">●</span> ${n.name}</h3>
+      <div class="dt-row"><span class="dt-label">类型</span> ${n.type}</div>
+      <div class="dt-row"><span class="dt-label">强度</span> ${(n.activationPotential||0).toFixed(4)}</div>
+      <div class="dt-row"><span class="dt-label">激活</span> ${n.activationCount||0} 次</div>
+      <div class="dt-row"><span class="dt-label">阈值</span> ${n.threshold}</div>
+      <div class="dt-row"><span class="dt-label">标签</span> ${(n.tags||[]).join(', ')}</div>
+      <div class="dt-row"><span class="dt-label">内容</span> <span style="color:#8b949e;font-size:11px;">${(n.content||'').slice(0,100)}${(n.content||'').length>100?'..':''}</span></div>
+      ${data.neighbors.length > 0 ? `<div style="margin-top:6px;font-size:11px;color:#8b949e;">强连接 (Top ${Math.min(data.neighbors.length,8)})</div>
+        ${data.neighbors.slice(0,8).map(nb => `<div class="neighbor"><span style="color:${TYPE_COLORS[nb.type]}">●</span> ${nb.name.slice(0,20)}</span><span style="color:#8b949e;">${(nb.weight*100).toFixed(0)}%</span></div>`).join('')}` : ''}
+    `;
+  } catch(e) {
+    content.innerHTML = '<span style="color:#f85149;">加载失败</span>';
+  }
+}
+
+document.getElementById('detail-close').addEventListener('click', () => {
+  document.getElementById('detail').classList.remove('show');
+  selectedId = null;
+});
+
+// ─── Create Modal ───
+let editingId = null;
+
+function showCreate() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = '新建记忆';
+  document.getElementById('modal-type').value = 'fact';
+  document.getElementById('modal-name').value = '';
+  document.getElementById('modal-content').value = '';
+  document.getElementById('modal-tags').value = '';
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function hideCreate() {
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+function editCurrent() {
+  if (!selectedId) return;
+  editingId = selectedId;
+  document.getElementById('modal-title').textContent = '编辑记忆';
+  fetch(API + '/neuron/' + selectedId).then(r=>r.json()).then(data => {
+    const n = data.neuron;
+    document.getElementById('modal-type').value = n.type;
+    document.getElementById('modal-name').value = n.name;
+    document.getElementById('modal-content').value = n.content || '';
+    document.getElementById('modal-tags').value = (n.tags||[]).join(', ');
+    document.getElementById('modal-overlay').classList.add('show');
+  });
+}
+
+function deleteCurrent() {
+  if (!selectedId) return;
+  if (!confirm('确定删除这个神经元？此操作不可撤销。')) return;
+  fetch(API + '/neuron/' + selectedId, { method: 'DELETE' }).then(r=>r.json()).then(result => {
+    document.getElementById('detail').classList.remove('show');
+    selectedId = null;
+    reloadGraph();
+  }).catch(e => alert('删除失败: ' + e.message));
+}
+
+async function submitCreate() {
+  const type = document.getElementById('modal-type').value;
+  const name = document.getElementById('modal-name').value.trim();
+  const content = document.getElementById('modal-content').value.trim();
+  const tagsStr = document.getElementById('modal-tags').value.trim();
+  if (!name) { alert('请输入名称'); return; }
+  const tags = tagsStr ? tagsStr.split(/[,，]/).map(t => t.trim()).filter(Boolean) : [];
+  
+  try {
+    if (editingId) {
+      // Update
+      const res = await fetch(API + '/neuron/' + editingId, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ name, content, tags })
+      });
+    } else {
+      // Create
+      await fetch(API + '/create', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ type, name, content, tags })
+      });
+    }
+    hideCreate();
+    await reloadGraph();
+    if (editingId && selectedId) showDetail(selectedId);
+  } catch(e) {
+    alert('操作失败: ' + e.message);
+  }
+}
+
+async function reloadGraph() {
+  try {
+    const data = await loadGraph();
+    if (svg) renderGraph(data);
+  } catch(e) { console.error('reload failed', e); }
+}
+
+// ─── Init ───
+async function init() {
+  try {
+    const data = await loadGraph();
+    renderGraph(data);
+  } catch(e) {
+    document.getElementById('stats').innerHTML = `<div style="color:#f85149;font-size:13px;">⚠ ${e.message||'未知错误'}<br><span style="font-size:11px;color:#8b949e;">请确保 server.js 已在 :3547 端口运行</span></div>`;
+  }
+}
+init();
+
+// ─── Resize ───
+window.addEventListener('resize', () => {
+  if (simulation) {
+    const w = document.getElementById('main').clientWidth;
+    const h = document.getElementById('main').clientHeight;
+    simulation.force('center', d3.forceCenter(w/2, h/2));
+    simulation.alpha(0.3).restart();
+  }
+});
+</script>
+</body>
+</html>

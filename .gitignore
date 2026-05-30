@@ -1,0 +1,25 @@
+# ⚠️ 安全警告：以下路径包含个人敏感数据，切勿提交
+
+# 神经数据（个人对话/记忆）
+memory/neural/neurons/
+memory/neural/archive/
+memory/neural/synapses.json
+
+# 环境变量（API Keys、密码）
+.env
+*.env
+
+# 系统配置
+config.json
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

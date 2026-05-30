@@ -1,0 +1,16 @@
+{
+  "name": "neural-memory",
+  "version": "1.2.0",
+  "description": "类人神经记忆系统 — 基于神经元和突触的 Agent 持续学习记忆架构",
+  "author": "终光 / Hight0xff",
+  "license": "MIT",
+  "tags": ["memory", "neural", "hebbian", "learning", "agent"],
+  "homepage": "https://github.com/Hight0xff/neural-memory-system",
+  "runtime": "node",
+  "minOpenClawVersion": "1.0.0",
+  "entry": "cli.js",
+  "tools": {
+    "recall": "recall.js",
+    "server": "server.js"
+  }
+}

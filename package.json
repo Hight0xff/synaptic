@@ -1,0 +1,41 @@
+{
+  "name": "neural-memory-system",
+  "version": "1.2.0",
+  "description": "🧠 Human-like neural memory system — Neuron-based persistent memory with Hebbian learning for AI agents",
+  "main": "cli.js",
+  "bin": {
+    "nm": "./cli.js",
+    "nm-recall": "./recall.js",
+    "nm-server": "./server.js"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "cli": "node cli.js",
+    "recall": "node recall.js",
+    "seed": "node seed-self.js",
+    "install": "node install.js"
+  },
+  "keywords": [
+    "neural-memory",
+    "hebbian-learning",
+    "agent-memory",
+    "ai-memory",
+    "openclaw-skill",
+    "mcp-server"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "lib/",
+    "cli.js",
+    "recall.js",
+    "server.js",
+    "seed-self.js",
+    "install.js",
+    "vis.html",
+    "skill/",
+    "mcp/"
+  ]
+}
